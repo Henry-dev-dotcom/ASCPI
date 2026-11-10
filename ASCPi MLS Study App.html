@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ASCPi MLS Study App</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0b6b5d">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ASCPi Study">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
 :root{--bg:#f7f6f2;--card:#fff;--ink:#1f2328;--mute:#667;--line:#e3e1d8;--acc:#0b6b5d;--accbg:#e2f1ee;--ok:#1a7f37;--okbg:#e6f4ea;--bad:#b42318;--badbg:#fdeceb;--hl:#fff3a8;--warn:#9a5b00;--warnbg:#fff4e0}
 @media(prefers-color-scheme:dark){:root{--bg:#16181a;--card:#1f2326;--ink:#e8e8e3;--mute:#9a9fa5;--line:#32373b;--acc:#4cc2ae;--accbg:#1c3430;--ok:#56d17c;--okbg:#17301f;--bad:#ff8a80;--badbg:#3a1d1b;--hl:#5a4d10;--warn:#ffc266;--warnbg:#3a2c10}}
@@ -56,10 +64,17 @@ table.p{border-collapse:collapse;width:100%;font-size:14.5px}table.p td,table.p 
 .hero{background:var(--accbg);border-color:var(--acc)}
 .timer{font-variant-numeric:tabular-nums;font-weight:700}.timer.low{color:var(--bad)}
 .note{font-size:14px;color:var(--mute)}
+button.inst{margin-left:auto;font:inherit;font-size:14px;font-weight:600;border-radius:999px;border:1px solid var(--acc);background:var(--acc);color:#fff;padding:6px 14px;cursor:pointer;white-space:nowrap}
+@media(prefers-color-scheme:dark){button.inst{color:#06201b}}
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:16px}
+.sheet .card{max-width:440px;width:100%;margin:0;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.sheet ol{padding-left:22px;margin:8px 0 14px}.sheet li{margin:6px 0}
+@media(min-width:561px){.sheet{align-items:center}}
+@media(max-width:560px){.hw{position:relative}button.inst{position:absolute;top:9px;right:12px;padding:5px 11px;font-size:13px}.hw:has(#inst:not(.hide)) nav{padding-right:92px}}
 @media(max-width:560px){.logo{display:none}.les .n{display:none}}
 </style></head><body>
 <header><div class="hw"><span class="logo">ASCPi Study</span>
-<nav id="nav"><button data-t="path">Lessons</button><button data-t="quiz">Quiz</button><button data-t="mock">Mock exam</button><button data-t="cards">Flashcards</button><button data-t="progress">Progress</button><button data-t="plan">Plan</button></nav></div></header>
+<nav id="nav"><button data-t="path">Lessons</button><button data-t="quiz">Quiz</button><button data-t="mock">Mock exam</button><button data-t="cards">Flashcards</button><button data-t="progress">Progress</button><button data-t="plan">Plan</button></nav><button class="inst hide" id="inst" type="button">⬇ Install app</button></div></header>
 <main id="main"></main>
 <script>
 const SECTIONS=["1. Hematology and Hemostasis (17-22%)","2. Clinical Chemistry (17-22%)","3. Microbiology (17-22%)","4. Blood Banking (17-22%)","5. Immunology and Serology (5-10%)","6. Urinalysis and Body Fluids (5-10%)","7. Laboratory Operations (5-10%)"];
@@ -229,4 +244,26 @@ function plan(){main.innerHTML='<div class="card notes">'+PLAN+'</div>';main.que
 const h0=(location.hash||'').slice(1);
 if(h0.startsWith('lesson/')&&lessonById(h0.slice(7)))go('lesson',h0.slice(7));
 else go(['path','quiz','mock','cards','progress','plan'].includes(h0)?h0:'path');
+
+/* ---------- INSTALL (PWA) ---------- */
+if('serviceWorker' in navigator&&location.protocol!='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+(function(){
+ const btn=$('#inst'),ua=navigator.userAgent;let deferred=null;
+ const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
+ const isIOS=/iphone|ipad|ipod/i.test(ua)||(navigator.platform=='MacIntel'&&navigator.maxTouchPoints>1);
+ const isMacSafari=!isIOS&&/Macintosh/.test(ua)&&/Safari\//.test(ua)&&!/Chrome|Chromium|Edg|Firefox|OPR/.test(ua);
+ const show=()=>{if(!standalone())btn.classList.remove('hide')},hide=()=>btn.classList.add('hide');
+ function sheet(title,steps){const d=document.createElement('div');d.className='sheet';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');
+  d.innerHTML=`<div class="card"><strong style="font-size:17px">${title}</strong><ol>${steps.map(s=>`<li>${s}</li>`).join('')}</ol><p class="note" style="margin:0 0 12px">The app then opens from your home screen like any other app, and works offline.</p><div class="row" style="margin:0"><button class="b pri" type="button">Got it</button></div></div>`;
+  const close=()=>{d.remove();btn.focus()};d.querySelector('button').onclick=close;d.onclick=e=>{if(e.target==d)close()};
+  d.addEventListener('keydown',e=>{if(e.key=='Escape')close()});document.body.appendChild(d);d.querySelector('button').focus()}
+ addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferred=e;show()});
+ addEventListener('appinstalled',()=>{deferred=null;hide()});
+ if(isIOS||isMacSafari)show();
+ btn.onclick=async()=>{
+  if(deferred){deferred.prompt();const r=await deferred.userChoice.catch(()=>null);deferred=null;if(r&&r.outcome=='accepted')hide();return}
+  if(isIOS)sheet('Install on iPhone or iPad',['Open this page in <b>Safari</b> (or Chrome on iOS 16.4+).','Tap the <b>Share</b> button (the square with an arrow).','Scroll down and tap <b>Add to Home Screen</b>, then <b>Add</b>.']);
+  else if(isMacSafari)sheet('Install on your Mac',['In the Safari menu bar, choose <b>File → Add to Dock</b>.','Click <b>Add</b>.']);
+  else sheet('Install this app',['Open this page in <b>Chrome</b> or <b>Edge</b>.','Click the install icon in the address bar, or open the browser menu and choose <b>Install app</b>.'])};
+})();
 </script></body></html>
