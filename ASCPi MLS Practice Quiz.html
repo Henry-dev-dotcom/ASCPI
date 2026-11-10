@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASCPi MLS Practice Quiz and Flashcards</title>
+<style>
+:root{--bg:#f7f6f2;--card:#fff;--ink:#1f2328;--mute:#667;--line:#e3e1d8;--acc:#0b6b5d;--accbg:#e2f1ee;--ok:#1a7f37;--okbg:#e6f4ea;--bad:#b42318;--badbg:#fdeceb}
+@media(prefers-color-scheme:dark){:root{--bg:#16181a;--card:#1f2326;--ink:#e8e8e3;--mute:#9a9fa5;--line:#32373b;--acc:#4cc2ae;--accbg:#1c3430;--ok:#56d17c;--okbg:#17301f;--bad:#ff8a80;--badbg:#3a1d1b}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1{font-size:22px;margin:0 0 4px}p.sub{color:var(--mute);margin:0 0 18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 14px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;background:var(--card);font-size:14px;user-select:none}
+.chip.on{background:var(--accbg);border-color:var(--acc);color:var(--acc);font-weight:600}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+button{font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px;cursor:pointer}
+button.pri{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+@media(prefers-color-scheme:dark){button.pri{color:#06201b}}
+button:disabled{opacity:.5;cursor:default}
+select{font:inherit;padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;background:var(--acc)}
+.meta{display:flex;justify-content:space-between;color:var(--mute);font-size:13px;margin-bottom:8px}
+.q{font-size:18px;font-weight:600;margin:0 0 14px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border-radius:10px}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.expl{margin-top:12px;padding:12px;border-radius:10px;background:var(--accbg);font-size:15px}
+.fc{min-height:200px;display:flex;align-items:center;justify-content:center;text-align:center;cursor:pointer;font-size:19px;padding:24px}
+.fc small{display:block;color:var(--mute);font-size:13px;margin-bottom:8px}
+.big{font-size:42px;font-weight:700;color:var(--acc)}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left}
+.hide{display:none}
+</style></head><body><main>
+<h1>ASCPi MLS Practice</h1>
+<p class="sub">Questions built from your high-yield notes. Pick sections, then choose quiz or flashcards.</p>
+<div id="setup" class="card">
+ <strong>Sections</strong>
+ <div class="chips" id="chips"></div>
+ <div class="row"><button id="all">Select all</button><button id="none">Clear</button><span id="avail" style="color:var(--mute);font-size:14px"></span></div>
+ <div class="row"><label>Questions: <select id="n"><option>10</option><option selected>20</option><option>40</option><option value="9999">All selected</option></select></label>
+ <label>Focus: <select id="focus"><option value="all">All questions</option><option value="missed">Only ones I missed before</option></select></label></div>
+ <div class="row"><button class="pri" id="goQuiz">Start quiz</button><button id="goCards">Flashcards</button></div>
+ <div id="hist" style="margin-top:10px;font-size:14px;color:var(--mute)"></div>
+</div>
+<div id="play" class="hide"></div>
+</main>
+<script>
+const SECTIONS = ["Hematology & Hemostasis","Clinical Chemistry","Microbiology","Blood Banking","Immunology & Serology","Urinalysis & Body Fluids","Laboratory Operations"];
+const Q = [
+// ---------- 0 HEMATOLOGY ----------
+[0,"Which anemia shows a low MCV, low serum iron, LOW TIBC and high ferritin?",["Iron deficiency","Anemia of chronic disease","Sideroblastic anemia","Thalassemia minor"],1,"Anemia of chronic disease: iron trapped in macrophages, so serum iron and TIBC are low and ferritin is normal/high. Iron deficiency has HIGH TIBC and low ferritin."],
+[0,"Hypersegmented neutrophils (≥5 lobes) and macro-ovalocytes suggest:",["Iron deficiency","Megaloblastic anemia (B12/folate)","Aplastic anemia","Lead poisoning"],1,"Impaired DNA synthesis gives macro-ovalocytes and hypersegmented neutrophils; MCV is usually >100 fL."],
+[0,"Which finding best separates thalassemia minor from iron deficiency?",["Low MCV","High RBC count with normal RDW and target cells","Low hemoglobin","Microcytosis"],1,"Thalassemia: RBC count high relative to Hgb, normal RDW, target cells, basophilic stippling, normal/high iron. Iron deficiency: low RBC count, high RDW."],
+[0,"Auer rods are characteristic of:",["CLL","Acute myeloid leukemia","Hairy cell leukemia","Multiple myeloma"],1,"Auer rods = fused primary granules, seen in AML (especially APL, M3) and not in lymphoid blasts."],
+[0,"Acute promyelocytic leukemia (M3) is associated with:",["t(9;22)","t(15;17) and DIC","t(8;14)","t(8;21) only"],1,"t(15;17) PML-RARA; heavy Auer rods (faggot cells), DIC; treated with all-trans retinoic acid."],
+[0,"The Philadelphia chromosome t(9;22) BCR-ABL is found in:",["CML","CLL","Polycythemia vera","Hodgkin lymphoma"],0,"CML: high WBC with left shift, basophilia, and a LOW leukocyte alkaline phosphatase (LAP) score."],
+[0,"Leukemoid reaction vs CML: the LAP score in a leukemoid reaction is:",["Low","High","Absent","Unchanged from normal"],1,"Leukemoid reaction = HIGH LAP (toxic granulation, Döhle bodies). CML = LOW LAP."],
+[0,"Smudge (basket) cells are typical of:",["CLL","AML","ITP","Aplastic anemia"],0,"CLL: mature small lymphocytes that rupture on smearing."],
+[0,"Tear-drop cells (dacrocytes) are classically seen in:",["Myelofibrosis","Sickle cell disease","Spherocytosis","Iron deficiency only"],0,"Myelofibrosis (marrow fibrosis, extramedullary hematopoiesis). Also seen in thalassemia and megaloblastic anemia."],
+[0,"Schistocytes with low platelets, fever and renal/neuro signs suggest:",["TTP","ITP","Hemophilia A","Iron deficiency"],0,"TTP: ADAMTS13 deficiency, microangiopathic hemolytic anemia, thrombocytopenia. Coags (PT/aPTT) are normal, unlike DIC."],
+[0,"Which hemoglobin migrates farthest toward the anode on alkaline (pH 8.6) electrophoresis?",["Hgb A","Hgb F","Hgb S","Hgb Bart’s / fast Hgb H"],3,"Hgb H and Bart’s are fastest. Order from the origin on alkaline: A2/C/E/O (slowest) → S/D/G → F → A → fast Hgb H."],
+[0,"On alkaline electrophoresis, Hgb S and Hgb D co-migrate. Which test separates them?",["Citrate agar pH 6.2","Sickle solubility test","Kleihauer-Betke","Heinz body stain"],0,"On acid citrate agar S separates from A, while D migrates with A. Sickle solubility is positive only for S."],
+[0,"Heinz bodies are best seen with which stain?",["Wright","Supravital (new methylene blue / crystal violet)","Prussian blue","Peroxidase"],1,"Heinz bodies = denatured hemoglobin; seen in G6PD deficiency and unstable Hgb. Need supravital stain."],
+[0,"Reticulocytes are best counted using:",["Wright stain","New methylene blue (supravital)","Prussian blue","Sudan black"],1,"Retics contain residual RNA seen as a reticulum with new methylene blue. Normal about 0.5-2.5% in adults."],
+[0,"Corrected reticulocyte count uses:",["Retic % × (patient Hct / 45)","Retic % × (45 / patient Hct)","Retic % × MCV","Retic % ÷ RBC"],0,"Corrected retic = retic % × (patient Hct ÷ normal Hct 45). Retic index also divides by maturation time."],
+[0,"Which factor is a vitamin K-dependent coagulation factor?",["V","VIII","VII","XIII"],2,"Vitamin K-dependent: II, VII, IX, X, plus proteins C and S. Factor VII has the shortest half-life, so PT rises first on warfarin."],
+[0,"Prolonged PT with normal aPTT suggests deficiency of:",["Factor VII","Factor VIII","Factor IX","Factor XII"],0,"PT = extrinsic (VII) + common. aPTT = intrinsic (VIII, IX, XI, XII) + common."],
+[0,"Prolonged aPTT corrected by mixing study (1:1 with normal plasma) indicates:",["Factor deficiency","Inhibitor (e.g., lupus anticoagulant)","Normal result","Pipetting error only"],0,"Correction = factor deficiency. No correction = inhibitor (lupus anticoagulant, factor VIII inhibitor)."],
+[0,"Which test monitors unfractionated heparin?",["PT/INR","aPTT","Thrombin time only","Bleeding time"],1,"UFH monitored by aPTT (or anti-Xa). Warfarin monitored by PT/INR."],
+[0,"The INR is calculated as:",["(Patient PT / mean normal PT)^ISI","Patient PT × ISI","Patient aPTT / control","Patient PT − control PT"],0,"INR = (patient PT ÷ mean normal PT) raised to the ISI of the thromboplastin."],
+[0,"Elevated D-dimer indicates:",["Fibrin degradation after cross-linked clot lysis","Fibrinogen consumption only","Platelet dysfunction","Factor VIII deficiency"],0,"D-dimer is a plasmin breakdown product of CROSS-LINKED fibrin: DIC, DVT, PE. FDP rises in both primary fibrinogenolysis and fibrinolysis."],
+[0,"Von Willebrand disease typically shows:",["Prolonged aPTT, abnormal ristocetin response, normal PT","Prolonged PT only","Normal aPTT, low platelets","Decreased fibrinogen"],0,"vWF carries factor VIII (aPTT may be prolonged) and mediates platelet adhesion via GPIb (ristocetin cofactor activity reduced)."],
+[0,"Bernard-Soulier syndrome (giant platelets, no ristocetin aggregation) is a defect of:",["GPIb","GPIIb/IIIa","Factor VIII","ADP receptor only"],0,"BSS: giant platelets, low count, no ristocetin aggregation (not corrected by normal plasma, unlike vWD). Glanzmann: GPIIb/IIIa, normal ristocetin, no aggregation with ADP/collagen."],
+[0,"Normal platelet count range is about:",["50-100 ×10⁹/L","150-400 ×10⁹/L","400-600 ×10⁹/L","10-50 ×10⁹/L"],1,"150-400 ×10⁹/L. Spontaneous bleeding risk rises below 10-20 ×10⁹/L."],
+[0,"Platelet satellitism / clumping giving a falsely low count is caused by:",["EDTA-dependent antibodies","Heparin","Sodium citrate","Hemolysis"],0,"EDTA pseudothrombocytopenia: recount in sodium citrate (multiply by 1.1) or check the smear."],
+[0,"Which cell is increased in allergic reactions and parasitic infection?",["Neutrophils","Eosinophils","Monocytes","Basophils only"],1,"Eosinophilia: allergy, parasites, Hodgkin lymphoma, drug reactions."],
+[0,"Atypical (reactive) lymphocytes are classically seen in:",["Infectious mononucleosis","Iron deficiency","Hemophilia","Polycythemia vera"],0,"EBV mono: reactive T cells; heterophile antibody positive."],
+[0,"Which condition has a high Hct, high RBC mass, low EPO and JAK2 mutation?",["Polycythemia vera","Secondary polycythemia","Relative polycythemia","Thalassemia"],0,"PV: low EPO, JAK2 V617F. Secondary polycythemia has HIGH EPO (hypoxia, tumor)."],
+[0,"The most common cause of microcytic anemia worldwide is:",["Iron deficiency","Thalassemia","Sideroblastic anemia","Lead poisoning"],0,"Iron deficiency: low ferritin, low iron, HIGH TIBC, low transferrin saturation."],
+[0,"Basophilic stippling is associated with:",["Lead poisoning","Hemophilia","Polycythemia","Infectious mononucleosis"],0,"Lead inhibits pyrimidine 5’-nucleotidase and heme synthesis; stippling also in thalassemia."],
+[0,"Hereditary spherocytosis shows which lab pattern?",["Increased MCHC and positive osmotic fragility","Decreased MCHC","Decreased osmotic fragility","Positive direct antiglobulin"],0,"Spectrin/ankyrin defect; MCHC increased (>36), osmotic fragility increased, DAT negative. DAT-positive spherocytes = autoimmune hemolytic anemia."],
+[0,"Paroxysmal nocturnal hemoglobinuria is diagnosed by:",["Flow cytometry (CD55/CD59 loss)","Ham test only","Osmotic fragility","Sickle prep"],0,"PNH lacks GPI-anchored CD55/CD59; flow cytometry is the test of choice. Sucrose hemolysis/Ham are older screens."],
+[0,"Hemoglobin A2 is elevated in:",["β-thalassemia minor","α-thalassemia","Iron deficiency","Sickle trait"],0,"β-thal minor: HbA2 3.5-8% and often HbF slightly up. HbA2 is normal/low in iron deficiency."],
+[0,"A peripheral smear with 'rouleaux' formation suggests:",["Elevated fibrinogen/immunoglobulins","Cold agglutinins","Iron deficiency","Spherocytosis"],0,"Rouleaux: increased fibrinogen or globulins (e.g., multiple myeloma). Cold agglutinins cause true agglutination (clumps), not stacks."],
+[0,"The erythrocyte sedimentation rate is INCREASED by:",["Sickle cells","Spherocytes","Rouleaux","Microcytosis only"],2,"ESR rises with rouleaux and acute-phase proteins; sickle cells, spherocytes and acanthocytes impede stacking and lower it."],
+[0,"Myeloperoxidase and Sudan black B positive blasts indicate:",["Myeloid lineage","Lymphoid lineage","Megakaryocytic only","Erythroid only"],0,"MPO/SBB = myeloid; TdT, CD10, CD19 = B-ALL; CD3 = T cell. PAS block-positive = lymphoblasts."],
+[0,"Tartrate-resistant acid phosphatase (TRAP) positivity is typical of:",["Hairy cell leukemia","CLL","AML M3","ITP"],0,"Hairy cell leukemia: TRAP+, BRAF V600E, CD11c/CD25/CD103."],
+// ---------- 1 CHEMISTRY ----------
+[1,"Which enzyme is most specific for pancreatitis?",["Lipase","AST","Amylase","LD"],0,"Lipase stays elevated longer (up to 8-14 days) and is more specific; amylase rises sooner but is also elevated in salivary disease."],
+[1,"Which enzyme rises in cholestasis and also in bone disease (osteoblast activity)?",["ALP","ALT","AST","CK"],0,"ALP rises in cholestasis and bone formation. GGT rises with ALP in liver disease but is normal in bone disease."],
+[1,"Which cardiac marker rises first (within 1-3 h) but is NOT cardiac specific?",["Myoglobin","Troponin I","CK-MB","LD1"],0,"Myoglobin rises earliest and falls fastest. Troponin is the preferred, specific marker and stays up 7-14 days."],
+[1,"CK-MM predominates in which tissue?",["Skeletal muscle","Brain","Myocardium only","Liver"],0,"CK-MM = skeletal muscle (~95%); CK-MB = heart; CK-BB = brain."],
+[1,"A 'flipped' LD pattern (LD1 > LD2) suggests:",["Myocardial infarction or hemolysis","Liver disease","Pneumonia","Pancreatitis"],0,"Normal LD2 > LD1. LD1 > LD2 in MI, hemolysis, megaloblastic anemia."],
+[1,"Hypercalcemia with HIGH PTH suggests:",["Primary hyperparathyroidism","Malignancy (PTHrP)","Vitamin D intoxication","Sarcoidosis"],0,"Primary hyperparathyroidism: high Ca, low phosphorus, high PTH. Malignancy: high Ca, LOW PTH."],
+[1,"Which electrolyte abnormality is the typical cause of peaked T waves?",["Hyperkalemia","Hypokalemia","Hypercalcemia","Hyponatremia"],0,"Hyperkalemia also falsely increased by hemolysis, delayed separation, and fist clenching."],
+[1,"Anion gap is calculated as:",["Na − (Cl + HCO3)","Na + Cl + HCO3","K − Cl","(Na + K) + Cl"],0,"AG = Na − (Cl + HCO3); normal about 8-12 (or 10-14 with K). High gap: MUDPILES (methanol, uremia, DKA, paraldehyde, isoniazid, lactate, ethylene glycol, salicylates)."],
+[1,"Primary respiratory acidosis shows:",["Low pH, high pCO2","Low pH, low pCO2","High pH, low pCO2","High pH, high HCO3"],0,"Respiratory acidosis: hypoventilation, high pCO2; kidneys compensate by raising HCO3 over days."],
+[1,"The Henderson-Hasselbalch pH is based on the ratio of:",["HCO3 to dissolved CO2 (0.03 × pCO2) = 20:1","Na to Cl","pCO2 to pO2","K to Ca"],0,"pH = 6.1 + log [HCO3 / (0.03 × pCO2)]; normal ratio 20:1."],
+[1,"Which is the reference (gold-standard-type) method for measuring glucose?",["Hexokinase","Glucose oxidase","Benedict","Ortho-toluidine"],0,"Hexokinase is the reference method (G6PD / NADH at 340 nm). Glucose oxidase is subject to interference from uric acid, ascorbic acid."],
+[1,"Diagnosis of diabetes by fasting plasma glucose requires:",["≥126 mg/dL","≥100 mg/dL","≥110 mg/dL","≥140 mg/dL"],0,"FPG ≥126; 2-h OGTT ≥200; HbA1c ≥6.5%; random ≥200 with symptoms. Prediabetes FPG 100-125, A1c 5.7-6.4%."],
+[1,"HbA1c reflects average glucose over about:",["2-3 months","1 week","2 days","1 year"],0,"Falsely low A1c with hemolysis/shortened RBC survival; HbS/C traits can interfere in some methods."],
+[1,"Which lipoprotein carries the most cholesterol and is calculated by Friedewald?",["LDL","HDL","Chylomicron","VLDL only"],0,"Friedewald LDL = TC − HDL − (TG/5); invalid when TG >400 mg/dL."],
+[1,"A milky plasma that stays milky with a creamy layer on top after overnight refrigeration indicates excess:",["Chylomicrons","LDL","HDL","IDL"],0,"Chylomicrons float (cream layer); VLDL gives uniform turbidity."],
+[1,"Total bilirubin is elevated with mostly UNCONJUGATED bilirubin in:",["Hemolytic anemia / Gilbert","Obstructive jaundice","Dubin-Johnson","Hepatitis with cholestasis"],0,"Prehepatic jaundice: indirect bilirubin up, no bilirubin in urine, urobilinogen increased. Obstruction: direct up, urine bilirubin positive, urobilinogen absent."],
+[1,"Which analyte is the best marker of chronic kidney function trends (GFR)?",["Creatinine clearance / eGFR","BUN alone","Uric acid","Urine specific gravity"],0,"Creatinine clearance = (U × V) / P × 1.73/BSA. Cystatin C is another marker not dependent on muscle mass."],
+[1,"BUN:creatinine ratio >20 suggests:",["Prerenal azotemia","Intrinsic renal disease","Postrenal only","Normal"],0,"Normal about 10-20. Prerenal (dehydration, CHF, GI bleed) is high; ATN/intrinsic is normal-low."],
+[1,"Which thyroid pattern indicates primary hypothyroidism?",["High TSH, low free T4","Low TSH, high free T4","Low TSH, low free T4","Normal TSH, high T3"],0,"Primary hypothyroidism: high TSH, low fT4 (Hashimoto). Secondary (pituitary): low TSH, low fT4."],
+[1,"Graves disease is caused by:",["TSH-receptor stimulating antibodies","Anti-TPO destroying thyroid","Pituitary tumor","Iodine deficiency"],0,"Graves: low TSH, high fT4/fT3, TSI antibodies."],
+[1,"Cushing syndrome: the test that fails to suppress cortisol is:",["Dexamethasone suppression","ACTH stimulation","Glucose tolerance","Metyrapone"],0,"Failure to suppress with low-dose dexamethasone = Cushing; high-dose suppression suggests pituitary (disease), not ectopic."],
+[1,"Elevated urinary VMA/metanephrines and catecholamines suggest:",["Pheochromocytoma","Carcinoid","Addison disease","Conn syndrome"],0,"Pheochromocytoma: plasma/urine metanephrines are the best screening test. Carcinoid: 5-HIAA."],
+[1,"Elevated 5-HIAA is associated with:",["Carcinoid tumor","Neuroblastoma","Cushing","Multiple myeloma"],0,"5-HIAA is a serotonin metabolite. Avoid bananas, pineapple, walnuts, avocado before collecting urine."],
+[1,"Alpha-fetoprotein (AFP) is elevated in:",["Hepatocellular carcinoma and neural tube defects","Prostate cancer","Pancreatic cancer","Breast cancer"],0,"AFP: HCC, germ cell tumors, neural tube defects. Low maternal AFP: Down syndrome (with low uE3, high hCG, high inhibin A)."],
+[1,"PSA is used for:",["Prostate cancer screening and monitoring","Ovarian cancer","Colon cancer","Pancreatic cancer"],0,"CA-125 = ovarian; CEA = colon (monitoring); CA 19-9 = pancreatic; hCG = trophoblastic/testicular."],
+[1,"Which method separates substances by charge and size in a support medium under an electrical field?",["Electrophoresis","Chromatography","Spectrophotometry","Osmometry"],0,"On serum protein electrophoresis, albumin travels farthest, then α1, α2, β, γ."],
+[1,"Serum protein electrophoresis with a sharp spike in the gamma region suggests:",["Monoclonal gammopathy (myeloma)","Nephrotic syndrome","Acute inflammation","Cirrhosis only"],0,"Monoclonal spike confirmed by immunofixation. Cirrhosis: β-γ bridging. Nephrotic: low albumin, high α2."],
+[1,"Lead, zinc, and other trace metals are best measured by:",["Atomic absorption spectrophotometry","Flame emission only","Nephelometry","Osmometry"],0,"AAS uses a hollow cathode lamp matched to the element; flame photometry/ISE used for Na, K, Li."],
+[1,"Ion-selective electrode for sodium uses which membrane?",["Glass membrane","Valinomycin","Crystal","Gel"],0,"Na: glass; K: valinomycin; Cl: ion-exchange; Ca: ion-exchange (ionized). pH: glass."],
+[1,"Beer’s law states absorbance is:",["Directly proportional to concentration","Inversely proportional to concentration","Unrelated to concentration","Equal to %T"],0,"A = abc = 2 − log %T. Absorbance is directly proportional to concentration."],
+[1,"The osmolal gap suggests the presence of:",["Toxic alcohols (methanol, ethylene glycol)","Hyperkalemia","Hemolysis","Hypocalcemia"],0,"Osmolal gap = measured − calculated (2Na + glucose/18 + BUN/2.8); >10 suggests unmeasured osmoles."],
+[1,"Acetaminophen toxicity damages the:",["Liver","Kidney first","Heart","Lung"],0,"Treat with N-acetylcysteine; nomogram uses level vs time after ingestion (4 h minimum)."],
+[1,"Therapeutic drug level should be drawn at the:",["Trough (just before the next dose)","Peak immediately after infusion for all drugs","Random time","After 12 h"],0,"Troughs for most; peaks also for aminoglycosides (efficacy and toxicity)."],
+[1,"Which porphyria pattern shows increased porphobilinogen and ALA in urine during attacks?",["Acute intermittent porphyria","Porphyria cutanea tarda","Erythropoietic protoporphyria","Lead poisoning"],0,"AIP: elevated PBG (Watson-Schwartz or Hoesch positive). PCT: uroporphyrin, photosensitivity. Lead: ALA and coproporphyrin increased, PBG normal."],
+[1,"The first step in porphyrin synthesis requires which vitamin?",["B6 (pyridoxine)","B12","Vitamin C","Folate"],0,"ALA synthase uses pyridoxal phosphate."],
+// ---------- 2 MICROBIOLOGY ----------
+[2,"Gram-positive cocci in clusters that are catalase POSITIVE and coagulase POSITIVE:",["Staphylococcus aureus","Staphylococcus epidermidis","Streptococcus pyogenes","Enterococcus faecalis"],0,"S. aureus: coagulase+, mannitol fermenter, beta-hemolytic. CoNS: coagulase negative."],
+[2,"Staphylococcus saprophyticus is resistant to:",["Novobiocin","Bacitracin","Optochin","Penicillin only"],0,"S. saprophyticus: novobiocin RESISTANT; causes UTI in young women. S. epidermidis is novobiocin susceptible."],
+[2,"Streptococcus pyogenes (group A) is identified by:",["Bacitracin susceptible, PYR positive","Optochin susceptible","Bile esculin positive","CAMP positive"],0,"GAS: beta-hemolytic, bacitracin S, PYR+. GBS: bacitracin R, CAMP+, hippurate+."],
+[2,"Streptococcus pneumoniae is:",["Optochin susceptible, bile soluble, alpha-hemolytic","Bacitracin susceptible","Optochin resistant","Beta-hemolytic"],0,"Lancet-shaped diplococci; quellung reaction positive."],
+[2,"Enterococcus is distinguished from group D non-enterococcus by:",["Growth in 6.5% NaCl","Bile esculin","Hemolysis","Catalase"],0,"Both are bile esculin+; only enterococci grow in 6.5% NaCl and are PYR+."],
+[2,"Viridans streptococci are:",["Alpha-hemolytic, optochin resistant, endocarditis","Beta-hemolytic","Gamma only","Optochin susceptible"],0,"S. viridans: subacute bacterial endocarditis after dental work."],
+[2,"The CAMP test is positive for:",["Streptococcus agalactiae","S. pyogenes","S. pneumoniae","Enterococcus"],0,"GBS: neonatal meningitis/sepsis; hippurate hydrolysis positive."],
+[2,"Corynebacterium diphtheriae grows on which medium?",["Tellurite agar (black colonies)","MacConkey","Thayer-Martin","Bordet-Gengou"],0,"Loeffler's slant and cystine-tellurite; gram-positive pleomorphic rods, Chinese letters; Elek test for toxin."],
+[2,"Listeria monocytogenes shows:",["Tumbling motility at 25 °C, beta-hemolysis","Spore formation","Catalase negative","Non-motile"],0,"Gram-positive rod, cold enrichment, umbrella motility; neonates, pregnancy, elderly."],
+[2,"Bacillus anthracis is:",["Non-motile, non-hemolytic, 'medusa head' colonies","Motile with wide hemolysis","Gram-negative","Catalase negative"],0,"B. cereus is motile and beta-hemolytic. Anthrax is a select agent."],
+[2,"Clostridium perfringens produces:",["Double zone hemolysis and positive Nagler (lecithinase)","Terminal spores","Tetanospasmin","Positive catalase"],0,"Gas gangrene; lecithinase (alpha toxin); stormy fermentation in litmus milk."],
+[2,"C. difficile infection is best diagnosed by:",["Toxin/GDH assay or PCR on liquid stool","Culture of formed stool","Gram stain","Blood culture"],0,"Test only unformed stool; antibiotic-associated colitis."],
+[2,"Neisseria gonorrhoeae grows on:",["Thayer-Martin (modified) in CO2","MacConkey","Blood agar in air","Sabouraud"],0,"Oxidase+, ferments glucose only. N. meningitidis ferments glucose AND maltose."],
+[2,"Which Neisseria ferments glucose and maltose?",["N. meningitidis","N. gonorrhoeae","N. lactamica only","Moraxella"],0,"Memory: Meningitidis = Maltose + glucose; Gonorrhoeae = glucose only."],
+[2,"Haemophilus influenzae requires:",["X (hemin) and V (NAD) factors","X only","V only","Neither"],0,"Satellite growth around S. aureus; chocolate agar. H. ducreyi needs X only. Type b capsule is the vaccine target."],
+[2,"Bordetella pertussis is grown on:",["Regan-Lowe or Bordet-Gengou","MacConkey","XLD","TCBS"],0,"Direct fluorescent antibody or PCR from nasopharyngeal swab (Dacron/calcium alginate, not cotton)."],
+[2,"Lactose-fermenting gram-negative rods on MacConkey include:",["E. coli, Klebsiella, Enterobacter, Citrobacter","Salmonella, Shigella","Proteus, Pseudomonas","Yersinia"],0,"Non-lactose fermenters: Salmonella, Shigella, Proteus, Pseudomonas, Yersinia."],
+[2,"On XLD or Hektoen agar, Salmonella produces:",["Black centered colonies (H2S)","Yellow colonies","Pink colonies","Green colonies only"],0,"Shigella: no H2S, colorless on Hektoen/XLD. Salmonella: H2S positive, motile; Shigella is non-motile."],
+[2,"E. coli O157:H7 is detected on:",["Sorbitol MacConkey (colorless colonies)","Blood agar","Thayer-Martin","CIN"],0,"Does not ferment sorbitol; Shiga toxin; hemolytic uremic syndrome."],
+[2,"Proteus species are characterized by:",["Swarming, urease positive, H2S positive","Lactose fermenting","Oxidase positive","Capsule"],0,"Proteus mirabilis: indole negative; P. vulgaris indole positive."],
+[2,"Klebsiella pneumoniae is:",["Mucoid, non-motile, lactose fermenter","Motile, non-lactose fermenter","Oxidase positive","H2S positive"],0,"Mucoid colonies; VP positive."],
+[2,"Pseudomonas aeruginosa is:",["Oxidase positive, grape-like odor, pyocyanin","Oxidase negative","Lactose fermenter","Non-motile"],0,"Blue-green pigment; grows at 42 °C. Intrinsically resistant to many agents."],
+[2,"Vibrio cholerae grows on:",["TCBS (yellow colonies)","Thayer-Martin","BCYE","Loeffler"],0,"V. parahaemolyticus: green on TCBS. Oxidase positive, string test, alkaline peptone water."],
+[2,"Campylobacter jejuni requires:",["42 °C microaerophilic incubation","Anaerobic 35 °C","Room air","Cold enrichment"],0,"Curved gram-negative rods; oxidase+; hippurate+; Campy-BAP/Skirrow."],
+[2,"Helicobacter pylori is detected by:",["Urease breath test / stool antigen","Culture on MacConkey","Blood culture","Wright stain"],0,"Rapidly urease positive; spiral gram-negative rod."],
+[2,"Legionella pneumophila requires:",["BCYE agar with L-cysteine and iron","Chocolate","MacConkey","TCBS"],0,"Urine antigen detects serogroup 1; stains poorly with Gram; silver stain (Dieterle)."],
+[2,"Mycobacterium tuberculosis stain is:",["Acid-fast (Ziehl-Neelsen/Kinyoun)","Gram","Giemsa","Methenamine silver"],0,"Fluorochrome (auramine-rhodamine) is more sensitive. Culture on Lowenstein-Jensen: buff, rough colonies in 3-6 weeks. Niacin positive."],
+[2,"Mycobacterium kansasii is a:",["Photochromogen","Scotochromogen","Nonchromogen","Rapid grower"],0,"Photochromogens (M. kansasii, marinum) produce pigment after light exposure. Scotochromogens (M. gordonae) pigment in dark."],
+[2,"Mycobacterium avium complex is associated with:",["AIDS patients","Aquarium granuloma","Leprosy","Tuberculosis in children"],0,"M. marinum: fish tank granuloma (grows at 30 °C). M. leprae: not cultured; armadillo."],
+[2,"A fungus that shows narrow-based budding yeast with a capsule on India ink is:",["Cryptococcus neoformans","Candida albicans","Histoplasma","Blastomyces"],0,"Cryptococcus: urease positive, capsule, CSF latex agglutination antigen; bird droppings."],
+[2,"Candida albicans is identified by:",["Germ tube positive","Urease positive","Capsule","Dimorphism at 37 °C"],0,"Germ tube in serum at 37 °C in 2-3 h; chlamydospores on cornmeal agar."],
+[2,"Dimorphic fungus found in the Ohio and Mississippi river valleys, small intracellular yeast in macrophages:",["Histoplasma capsulatum","Coccidioides immitis","Blastomyces dermatitidis","Sporothrix"],0,"Histoplasma: tuberculate macroconidia in mold phase; bird/bat droppings. Coccidioides: spherules with endospores, Southwest US. Blastomyces: broad-based budding."],
+[2,"Which organism causes 'rose gardener's disease'?",["Sporothrix schenckii","Aspergillus","Candida","Cryptococcus"],0,"Dimorphic; cigar-shaped yeast; subcutaneous lymphocutaneous spread."],
+[2,"Plasmodium falciparum features:",["Banana-shaped gametocytes, multiple rings per RBC","Schüffner dots","Ameboid trophozoites","Enlarged RBCs"],0,"Falciparum: no enlarged RBCs; severe malaria. P. vivax/ovale show Schüffner dots and enlarged RBCs. P. malariae: band forms, 72-h cycle."],
+[2,"Giardia lamblia is recognized by:",["Pear-shaped trophozoite with two nuclei ('face') and cysts in stool","Large trophozoite with ingested RBCs","Banana-shaped","Eight nuclei cysts only"],0,"Entamoeba histolytica trophozoites with ingested RBCs; cysts with up to 4 nuclei and chromatoidal bars."],
+[2,"A ‘scotch-tape’ preparation detects eggs of:",["Enterobius vermicularis (pinworm)","Ascaris","Trichuris","Taenia"],0,"Collected in the morning before bathing; eggs are flattened on one side."],
+[2,"Best practice for collecting blood cultures is:",["Skin antisepsis, two sets from separate sites","Single bottle only","Catheter tip culture only","Swab of skin"],0,"Two to three sets reduces contamination interpretation; CoNS in only one set suggests contaminant."],
+[2,"The MIC (minimum inhibitory concentration) is:",["The lowest drug concentration inhibiting visible growth","The concentration killing 99.9%","Zone diameter","The peak serum level"],0,"MBC kills 99.9%. Kirby-Bauer measures zone of inhibition; Mueller-Hinton agar, 0.5 McFarland, 16-18 h."],
+[2,"The McFarland 0.5 standard approximates:",["1.5 × 10⁸ CFU/mL","10⁵ CFU/mL","10⁹ CFU/mL","3 × 10⁸ CFU/mL"],0,"Used for disk diffusion and broth microdilution inocula."],
+[2,"MRSA is best detected by:",["Cefoxitin disk or mecA/PBP2a","Penicillin disk","Bacitracin","Optochin"],0,"Cefoxitin is the surrogate; oxacillin MIC ≥4 for S. aureus. Drug of choice: vancomycin."],
+[2,"A D-test checks for:",["Inducible clindamycin resistance","ESBL","Carbapenemase","Penicillinase"],0,"Erythromycin-resistant, clindamycin-susceptible staph/strep: flattened zone near the erythromycin disk = inducible resistance."],
+[2,"ESBL-producing organisms are resistant to:",["Penicillins, cephalosporins and aztreonam; inhibited by clavulanate","Carbapenems","Aminoglycosides only","Tetracycline only"],0,"Carbapenems remain active (unless carbapenemase). Confirm with cephalosporin ± clavulanic acid."],
+[2,"The oxidase test detects:",["Cytochrome c oxidase","Catalase","Urease","Beta-lactamase"],0,"Positive: Neisseria, Pseudomonas, Vibrio, Campylobacter, Aeromonas, Pasteurella. Enterobacterales are oxidase negative."],
+[2,"Indole positive Enterobacterales include:",["E. coli","Klebsiella pneumoniae","Salmonella","Enterobacter"],0,"Memory: E. coli is indole positive, MR positive, VP negative, citrate negative. Klebsiella/Enterobacter: VP positive, citrate positive."],
+[2,"HBsAg positive with anti-HBc IgM positive indicates:",["Acute HBV infection","Immunity from vaccine","Past resolved infection","False positive"],0,"Vaccinated: only anti-HBs. Resolved: anti-HBs + anti-HBc IgG. Chronic: HBsAg+ >6 months with anti-HBc IgG."],
+[2,"Which virus has a characteristic 'owl's eye' inclusion?",["Cytomegalovirus","HSV","Adenovirus","Measles"],0,"CMV; HSV shows multinucleated giant cells with Cowdry A inclusions; Tzanck smear."],
+// ---------- 3 BLOOD BANKING ----------
+[3,"A patient types as group A on forward grouping and has anti-A in reverse grouping. The most likely explanation:",["Subgroup of A or weak A","Group O","Group B","Rouleaux only"],0,"Forward and reverse must agree. Anti-A in the serum of an A cell patient suggests a weak A subgroup (A2 with anti-A1), or other discrepancy; work up with anti-A1 lectin, adsorption/elution."],
+[3,"Which blood type is the universal RBC donor?",["O negative","AB positive","A negative","B negative"],0,"Group O has no A/B antigens. AB positive is the universal recipient for RBCs. AB plasma is the universal plasma donor."],
+[3,"Which antibody is typically IgM, reacts best at room temperature and is clinically insignificant if reactive only at 4-22 °C?",["Anti-I, anti-M, anti-P1, anti-Lea","Anti-D","Anti-K","Anti-Fya"],0,"Cold-reacting IgM antibodies: often benign. Significant antibodies are IgG and react at 37 °C/AHG (Rh, Kell, Duffy, Kidd, S, s)."],
+[3,"Which antibodies show dosage (stronger reaction with homozygous cells)?",["Rh (except D), Kidd, Duffy, MNS","Kell, Lutheran","Lewis only","P1 only"],0,"Dosage: Rh (c, e, C, E), Kidd (Jka/Jkb), Duffy (Fya/Fyb), MNS (M, N, S, s). Kell shows little dosage because most K+ people are heterozygous (K+k+)."],
+[3,"Which antibodies are destroyed or weakened by enzymes (ficin/papain)?",["Duffy (Fya/Fyb) and MNS (M, N, S, s)","Rh","Kidd","Lewis"],0,"Enzymes enhance Rh, Kidd, Lewis, P1, I; destroy Duffy and MNS (M, N, S, s), Xga."],
+[3,"Which test is used to detect IgG sensitized cells in the direct antiglobulin test?",["Polyspecific AHG with anti-IgG and anti-C3d","Immediate-spin only","Saline wash only","Enzyme"],0,"DAT positive in AIHA, HDFN, delayed hemolytic transfusion reaction, drugs. Check-cells (IgG-coated) must be added to every negative AHG test."],
+[3,"A negative AHG test must be confirmed by adding:",["IgG-coated check cells","Anti-D","Saline","Albumin"],0,"If check cells do not agglutinate, the test is invalid (inadequate washing or neutralized AHG)."],
+[3,"Which enhances antibody-antigen reactivity (IgG) in testing?",["LISS and PEG","Saline only","Dithiothreitol","Heating to 56 °C"],0,"Enhancement media: LISS, PEG, albumin; incubate 37 °C. Enzymes also enhance some."],
+[3,"DTT (dithiothreitol) treatment of RBCs is useful to:",["Destroy Kell system antigens and disperse IgM","Enhance Rh","Remove Duffy","Detect Kidd"],0,"DTT/AET denature Kell antigens (and Cartwright, Dombrock, Knops). It also cleaves IgM disulfide bonds in serum (differentiate IgM from IgG)."],
+[3,"The Rh immune globulin standard antepartum dose is:",["300 µg at 28 weeks and within 72 h after delivery","50 µg only","1500 µg","None required if baby is Rh negative"],0,"Given if mother is D negative and baby D positive (or unknown). A 300 µg dose covers about 30 mL whole blood / 15 mL RBCs. Kleihauer-Betke or flow quantifies fetomaternal hemorrhage."],
+[3,"If a Rh-negative mother delivers an Rh-positive baby and the rosette screen is positive, you should perform:",["Kleihauer-Betke or flow cytometry to determine dose","Repeat the rosette","No further testing","DAT on mother"],0,"Rosette is qualitative. Fetal bleed (mL whole blood) = % fetal cells × 50; vials = bleed ÷ 30, rounded per lab policy, then add 1 vial."],
+[3,"Hemolytic disease of the newborn due to ABO incompatibility most often involves:",["Group O mother, group A or B baby","Group A mother, group O baby","Group AB mother","Group B mother, group A baby only"],0,"ABO HDFN is milder: DAT weak/negative, spherocytes. Rh HDFN: DAT strongly positive."],
+[3,"Cord blood testing for newborn includes:",["ABO, Rh (D), DAT","Antibody screen only","Crossmatch only","Kell phenotyping"],0,"If the baby types D negative on immediate spin, test for weak D (AHG) because it decides whether the mother needs RhIG."],
+[3,"A weak D test (Du) is performed by:",["Indirect antiglobulin test","Immediate spin only","Enzyme only","Saline only"],0,"Donor weak D units are labeled Rh positive. Patient weak D is handled per lab policy (some treat as Rh positive, some as Rh negative)."],
+[3,"Which donor requirement is correct for whole blood donation?",["Hemoglobin ≥12.5 g/dL, weight ≥110 lb, interval ≥8 weeks","Hemoglobin ≥10, interval 4 weeks","Weight ≥90 lb","Temperature ≤101 °F"],0,"Also pulse 50-100, temperature ≤99.5 °F, blood pressure ≤180/100. Whole blood interval 8 weeks (56 days); double RBC 16 weeks."],
+[3,"RBCs stored in CPDA-1 have a shelf life of:",["35 days","21 days","42 days","10 days"],0,"CPD/CP2D: 21 days; CPDA-1: 35 days; additive solutions (AS-1, AS-3, AS-5): 42 days. Frozen RBCs: up to 10 years. Irradiated RBCs: 28 days or original outdate if sooner."],
+[3,"Storage temperature of RBCs is:",["1-6 °C","20-24 °C","-18 °C","37 °C"],0,"Transport 1-10 °C. Platelets 20-24 °C with agitation (5 days; 4 h pooled open). FFP ≤ -18 °C, 1 year. Cryo ≤ -18 °C."],
+[3,"Platelets are stored at:",["20-24 °C with continuous agitation","1-6 °C","-18 °C","37 °C"],0,"QC: ≥3 × 10¹¹ platelets per apheresis unit, ≥5.5 × 10¹⁰ per whole-blood-derived unit, pH ≥6.2."],
+[3,"Cryoprecipitate contains:",["Factor VIII, vWF, fibrinogen, XIII, fibronectin","Albumin","IgG","Factor IX"],0,"Minimum factor VIII 80 IU and fibrinogen 150 mg per unit. Used for hypofibrinogenemia, DIC, vWD (if concentrate unavailable)."],
+[3,"Fresh frozen plasma is used to replace:",["Multiple coagulation factors (warfarin reversal, liver disease, DIC)","Platelets","Red cells","Factor VIII only"],0,"Thaw at 30-37 °C; use within 24 h (or relabel as thawed plasma 5 days). Must be ABO compatible."],
+[3,"Irradiated cellular components prevent:",["Transfusion-associated graft-versus-host disease","Febrile reactions","Allergic reactions","CMV"],0,"Dose 25 Gy. For immunocompromised, intrauterine transfusion, HLA-matched products, directed donations from relatives."],
+[3,"Leukoreduced components reduce:",["Febrile non-hemolytic reactions, HLA alloimmunization, CMV transmission","TA-GVHD","Allergic reactions","Hemolysis"],0,"Washed products reduce allergic reactions and remove plasma (IgA-deficient patients)."],
+[3,"A febrile non-hemolytic transfusion reaction is caused by:",["Cytokines/antibodies to donor WBCs","ABO incompatibility","Anti-IgA","Bacterial contamination"],0,"Temp rise ≥1 °C; first rule out hemolysis (visual check, DAT, clerical check) and bacterial contamination."],
+[3,"The first thing to do if a transfusion reaction is suspected is:",["Stop the transfusion, keep the line open, and verify identification","Continue slowly","Discard the bag","Give more units"],0,"Then clerical check, visual inspection of post sample for hemolysis, DAT; report to blood bank."],
+[3,"An anaphylactic transfusion reaction is most associated with:",["Anti-IgA in IgA-deficient recipients","Anti-D","ABO","Cytokines"],0,"Use washed components or IgA-deficient donors."],
+[3,"TRALI is characterized by:",["Noncardiogenic pulmonary edema within 6 hours, donor anti-HLA/HNA antibodies","Hypertension and heart failure","Fever and chills only","Hives"],0,"TACO is cardiogenic overload with hypertension, elevated BNP. TRALI: hypotension and fever possible."],
+[3,"A delayed hemolytic transfusion reaction typically involves:",["Anamnestic antibody (Kidd, Rh, Duffy, Kell) in 3-14 days with positive DAT","ABO incompatibility at onset","Anti-Lea","Cold agglutinins"],0,"Extravascular hemolysis; drop in Hgb, mild jaundice; antibody screen newly positive."],
+[3,"Acute hemolytic transfusion reactions are mostly caused by:",["ABO incompatibility from clerical error","Anti-Kell","Anti-Lea","Anti-P1"],0,"Intravascular: hemoglobinemia, hemoglobinuria, DIC, renal failure; complement-mediated."],
+[3,"Bombay phenotype (Oh) RBCs type as:",["O, lack H antigen; serum has anti-A, anti-B and anti-H","O, with anti-H absent","AB","A weak"],0,"Anti-H reacts with all O cells; transfuse only Bombay blood."],
+[3,"Lewis antibodies are generally:",["Not clinically significant, IgM, adsorbed onto RBCs from plasma","Cause severe HDFN","Warm reacting IgG","Always significant"],0,"Lewis antigens are plasma antigens adsorbed onto red cells; disappear during pregnancy. Do not cause HDFN."],
+[3,"The antibody most commonly implicated in paroxysmal cold hemoglobinuria is anti-:",["P (Donath-Landsteiner antibody)","I","i","Lea"],0,"Biphasic hemolysin: binds in cold, hemolyzes at warm. Cold agglutinin disease: anti-I (Mycoplasma); anti-i (infectious mononucleosis)."],
+[3,"Warm autoimmune hemolytic anemia shows:",["Pan-reactive IgG, positive DAT, all crossmatches incompatible","Cold reaction only","Negative DAT","Anti-I"],0,"Rule out alloantibodies using autoadsorption (or allogeneic adsorption)."],
+[3,"Which donor testing is required (infectious disease markers)?",["HIV-1/2, HCV, HBV, HTLV-I/II, syphilis, WNV, Chagas, Zika (as required)","HAV only","CMV only","EBV"],0,"NAT: HIV, HCV, HBV, WNV; antibody screens: HTLV, T. cruzi (once), anti-HBc, syphilis. Bacterial testing for platelets."],
+[3,"Autologous donors must have a hemoglobin of at least:",["11 g/dL","12.5","14","9"],0,"Autologous collections have relaxed requirements; Hct ≥33%; not subject to the 8-week rule; unit must be labeled 'For Autologous Use Only'."],
+[3,"Emergency release of uncrossmatched blood for an unknown patient uses:",["Group O RBCs (Rh negative for females of childbearing potential)","Group AB","Group A","Group B"],0,"Physician signature required; complete crossmatch afterward; AB plasma is universal."],
+[3,"Which crossmatch is required if the antibody screen is negative and there is no history of antibodies?",["Immediate spin or electronic crossmatch","Full AHG crossmatch","None","Enzyme"],0,"AHG crossmatch required with a positive screen or history of clinically significant antibodies."],
+[3,"Antigen-negative units for an antibody are selected by:",["Typing donor units with antisera and performing AHG crossmatch","Typing only","Random selection","Using O only"],0,"Probability of finding compatible units: freq of negative antigens multiplied together; e.g., K negative = 91%, E negative = 70%, Fya negative = 34%."],
+[3,"A direct antiglobulin test positive with only anti-C3d may be seen in:",["Cold agglutinin disease","Warm AIHA","Hemolytic disease of the newborn","Rh"],0,"Complement-only DAT: cold agglutinin disease, PCH, some drug-induced."],
+[3,"What is the preferred treatment for severe hemophilia A with bleeding?",["Factor VIII concentrate","FFP","Cryo only","RBC"],0,"Desmopressin for mild hemophilia A/vWD. Cryoprecipitate/FFP only if concentrates unavailable."],
+// ---------- 4 IMMUNOLOGY ----------
+[4,"Which immunoglobulin is the first made in a primary response and the largest?",["IgM","IgG","IgA","IgE"],0,"IgM: pentamer, best complement activator. IgG crosses the placenta; IgA is secretory; IgE mediates allergy; IgD is a B cell receptor."],
+[4,"IgG crosses the placenta. A newborn with elevated IgM suggests:",["Intrauterine infection","Normal maternal transfer","Immunodeficiency","Vaccination"],0,"IgM does not cross, so cord IgM >20 mg/dL indicates fetal infection (TORCH)."],
+[4,"Type I hypersensitivity is mediated by:",["IgE on mast cells","IgG and complement","Immune complexes","T cells"],0,"Immediate: anaphylaxis, atopy. Type II: antibody-mediated cytotoxicity (hemolytic anemia, Goodpasture). Type III: immune complex (SLE, serum sickness). Type IV: delayed T-cell (TB test, contact dermatitis)."],
+[4,"Which is an example of type III hypersensitivity?",["Systemic lupus erythematosus","Anaphylaxis","Contact dermatitis","Graft rejection"],0,"Immune complexes deposit in tissues; low C3/C4; anti-dsDNA is specific for SLE."],
+[4,"The most specific ANA antibody for SLE is:",["Anti-dsDNA and anti-Sm","Anti-centromere","Anti-Jo-1","Anti-histone"],0,"Anti-histone: drug-induced lupus. Anti-centromere: CREST. Anti-Scl-70: systemic sclerosis. Anti-SSA/SSB: Sjogren. Anti-Jo-1: polymyositis."],
+[4,"Anti-centromere antibodies are linked to:",["CREST/limited scleroderma","SLE","Drug-induced lupus","Polymyositis"],0,"ANA staining pattern: centromere = discrete speckled; homogenous = dsDNA/histone; nucleolar = scleroderma."],
+[4,"A rim (peripheral) ANA pattern is most specific for:",["Anti-dsDNA","Anti-Sm","Anti-SSA","Anti-centromere"],0,"Rim/peripheral pattern = anti-dsDNA (SLE). Crithidia luciliae test detects anti-dsDNA."],
+[4,"Anti-mitochondrial antibody is seen in:",["Primary biliary cholangitis","Autoimmune hepatitis","Celiac disease","SLE"],0,"AMA: PBC. Anti-smooth muscle: autoimmune hepatitis type 1. Anti-LKM: type 2."],
+[4,"Anti-tissue transglutaminase IgA and anti-endomysial IgA are used for:",["Celiac disease","Crohn disease","Graves","Myasthenia gravis"],0,"Check total IgA; IgA deficiency causes false negatives."],
+[4,"Anti-acetylcholine receptor antibodies are found in:",["Myasthenia gravis","Multiple sclerosis","Graves disease","Lambert-Eaton"],0,"Anti-Hu: paraneoplastic. Anti-GBM: Goodpasture. ANCA: c-ANCA (PR3) in granulomatosis with polyangiitis; p-ANCA (MPO) in microscopic polyangiitis."],
+[4,"c-ANCA (PR3) is associated with:",["Granulomatosis with polyangiitis (Wegener)","Microscopic polyangiitis","SLE","Goodpasture"],0,"Cytoplasmic pattern; p-ANCA perinuclear = MPO."],
+[4,"Rheumatoid factor is an antibody directed against:",["The Fc portion of IgG","dsDNA","Thyroglobulin","Histone"],0,"RF is usually IgM; anti-CCP is more specific for rheumatoid arthritis."],
+[4,"Which complement component deficiency predisposes to recurrent Neisseria infections?",["C5-C9 (membrane attack complex)","C1","C3 only","Factor B"],0,"C3 deficiency: severe pyogenic infections; C1 inhibitor deficiency: hereditary angioedema (low C4)."],
+[4,"Hereditary angioedema is caused by deficiency of:",["C1 esterase inhibitor","C3","C5","Factor H"],0,"C4 is low during and between attacks; C3 normal."],
+[4,"The classical complement pathway is activated by:",["Antigen-antibody complexes (C1q binding IgM/IgG)","Bacterial polysaccharides directly","Mannose","Properdin"],0,"Alternative: spontaneous C3 hydrolysis, LPS (factor B, D, properdin). Lectin: mannose-binding lectin."],
+[4,"The primary test for HIV infection in adults is:",["4th generation Ag/Ab combination immunoassay, then differentiation assay","Western blot alone","Culture","CD4 count"],0,"Reactive screen → HIV-1/2 antibody differentiation assay → HIV-1 NAT if discordant. CD4 count and viral load monitor progression/treatment."],
+[4,"CD4 T-cell count below which defines AIDS (with HIV)?",["<200 cells/µL","<500","<50","<1000"],0,"Normal CD4 about 500-1500; CD4:CD8 ratio normal ≈2."],
+[4,"Syphilis screening using nontreponemal tests includes:",["RPR and VDRL","FTA-ABS","TP-PA","EIA treponemal"],0,"Nontreponemal: RPR/VDRL (cardiolipin antigen), titers track treatment, biologic false positives (lupus, pregnancy, mono). Treponemal: FTA-ABS, TP-PA, EIA/CIA: remain positive for life."],
+[4,"Biological false-positive RPR/VDRL can be caused by:",["SLE, pregnancy, infectious mononucleosis, IV drug use","Syphilis only","Treatment","Vaccination for HBV"],0,"Confirm with treponemal test."],
+[4,"The prozone phenomenon results from:",["Antibody excess giving a false negative","Antigen excess","Contaminated reagent","Low temperature"],0,"Dilute the serum to correct. Postzone = antigen excess."],
+[4,"Heterophile antibody tests (Monospot) are used for:",["Infectious mononucleosis (EBV)","CMV","HIV","Toxoplasma"],0,"Mono heterophile antibody is absorbed by beef RBCs but NOT by guinea pig kidney (the reverse is true for Forssman antibody). EBV VCA IgM confirms."],
+[4,"EBV VCA IgM present with EBNA negative indicates:",["Acute (primary) infection","Past infection","Reactivation","Immunity only"],0,"Past infection: VCA IgG +, EBNA +."],
+[4,"Rubella IgG positive, IgM negative in a pregnant woman indicates:",["Immunity","Acute infection","Susceptibility","Reinfection"],0,"A fourfold (two dilution) IgG titer rise between acute and convalescent sera also indicates infection."],
+[4,"Hepatitis A acute infection is diagnosed by:",["Anti-HAV IgM","Anti-HAV IgG","HBsAg","Anti-HBc"],0,"HAV fecal-oral. HCV: anti-HCV then HCV RNA; HDV only with HBV."],
+[4,"The Mantoux (PPD) test is read at:",["48-72 hours","6 hours","1 week","24 hours"],0,"Type IV hypersensitivity; induration (not erythema) measured: ≥5 mm HIV/immunosuppressed, ≥10 mm risk groups, ≥15 mm low risk. IGRA (QuantiFERON) not affected by BCG."],
+[4,"Which immunoglobulin class is associated with mucosal secretions?",["IgA","IgD","IgG","IgM"],0,"Secretory IgA has a J chain and secretory component."],
+[4,"Bruton agammaglobulinemia is:",["X-linked, absent B cells and immunoglobulins","T cell deficiency","Complement deficiency","Phagocyte defect"],0,"DiGeorge: T cell deficiency (thymic aplasia, low calcium). SCID: both B and T. Chronic granulomatous disease: NADPH oxidase defect, abnormal NBT/DHR test."],
+[4,"Chronic granulomatous disease is detected by:",["Abnormal nitroblue tetrazolium/dihydrorhodamine test","Complement assay","Flow for CD4","IgG level"],0,"Phagocytes cannot make superoxide; catalase-positive organisms (Staph, Aspergillus, Serratia)."],
+[4,"Multiple myeloma lab finding includes:",["Monoclonal spike, Bence Jones proteinuria, rouleaux, hypercalcemia","Polyclonal increase","Low ESR","Neutrophilia"],0,"Bence Jones proteins (free light chains) are NOT detected by dipstick (albumin-sensitive); use sulfosalicylic acid test or immunofixation."],
+[4,"HLA typing is important for:",["Transplantation and disease associations","ABO","Rh typing","Coagulation"],0,"HLA-B27: ankylosing spondylitis; HLA-DR3/DR4: autoimmune diabetes, RA; HLA-DQ2/DQ8: celiac."],
+[4,"A positive crossmatch by complement-dependent cytotoxicity before kidney transplant predicts:",["Hyperacute rejection","Acute cellular rejection","Chronic rejection","GVHD"],0,"Preformed antibodies to donor HLA."],
+[4,"Which cell marker identifies B cells?",["CD19/CD20","CD3","CD4","CD56"],0,"T cells: CD3; helper: CD4; cytotoxic: CD8; NK: CD16/CD56; stem cells: CD34; monocytes: CD14."],
+[4,"Immunofixation electrophoresis is used to:",["Identify the type of monoclonal protein","Count cells","Measure complement","Detect ANA"],0,"Pairs electrophoresis with specific antisera (IgG, IgA, IgM, κ, λ)."],
+[4,"Nephelometry measures:",["Light scattered by antigen-antibody complexes","Absorbance","Fluorescence","Radioactivity"],0,"Turbidimetry measures light transmitted/blocked; nephelometry measures scattered light at an angle."],
+// ---------- 5 URINALYSIS ----------
+[5,"Normal urine pH range is about:",["4.5-8.0","1-3","9-11","7.5-9.5 only"],0,"Fresh first-morning urine is slightly acidic. Alkaline urine from standing (urea-splitting bacteria produce ammonia)."],
+[5,"Normal urine specific gravity (random) is:",["1.003-1.030","1.000 only","1.040-1.060","0.990"],0,"Isosthenuria = 1.010 (SG of the glomerular filtrate). Glucose and protein falsely raise SG on a refractometer."],
+[5,"The reagent strip protein pad is most sensitive to:",["Albumin","Bence Jones protein","Globulins","Mucoprotein"],0,"Use sulfosalicylic acid (SSA) for all proteins; false positives with alkaline urine/quaternary ammonium."],
+[5,"Glucosuria with normal blood glucose suggests:",["Renal tubular dysfunction (low renal threshold)","Diabetes","Pancreatitis","Dehydration"],0,"Renal threshold for glucose about 160-180 mg/dL. Clinitest detects all reducing substances (galactose, lactose)."],
+[5,"Ketones on a dipstick react mainly with:",["Acetoacetic acid (nitroprusside)","Beta-hydroxybutyrate","Acetone only","Lactate"],0,"Ketone pad does not detect beta-hydroxybutyrate (the predominant ketone in DKA)."],
+[5,"Bilirubin in urine indicates:",["Conjugated bilirubin (obstructive/hepatic disease)","Unconjugated bilirubin","Hemolysis only","Normal"],0,"Light destroys bilirubin; urobilinogen increased in hemolysis and hepatocellular disease, absent in biliary obstruction."],
+[5,"A positive blood dipstick with no RBCs on microscopic exam suggests:",["Hemoglobinuria or myoglobinuria","Hematuria","Bacteriuria","Normal"],0,"Hemoglobinuria: plasma pink (hemolysis); myoglobinuria: plasma clear (rhabdomyolysis). Lysed RBCs in alkaline/dilute urine also react."],
+[5,"A positive leukocyte esterase and positive nitrite suggest:",["Bacterial UTI","Glomerulonephritis","Contamination only","Dehydration"],0,"Nitrite requires nitrate-reducing bacteria (Enterobacterales) and 4 h bladder incubation; gram-positive cocci are nitrite negative."],
+[5,"RBC casts are found in:",["Glomerulonephritis","Pyelonephritis","Cystitis","Normal"],0,"WBC casts: pyelonephritis/interstitial nephritis. Fatty casts: nephrotic syndrome (oval fat bodies, Maltese cross under polarized light). Waxy casts: chronic renal failure. Broad casts: renal stasis."],
+[5,"Hyaline casts are composed of:",["Tamm-Horsfall protein","Cells","Fat","Crystals"],0,"Seen in normal individuals after exercise, dehydration; best seen with reduced light/phase contrast."],
+[5,"Urine crystals that are coffin-lid shaped, found in alkaline urine:",["Triple phosphate (struvite)","Uric acid","Calcium oxalate","Cystine"],0,"Associated with urease-producing bacteria (Proteus)."],
+[5,"Hexagonal crystals in acid urine suggest:",["Cystine","Cholesterol","Leucine","Tyrosine"],0,"Positive cyanide-nitroprusside test confirms cystine; cystinuria."],
+[5,"Envelope-shaped calcium oxalate crystals are seen after ingestion of:",["Ethylene glycol or vitamin C/spinach","Penicillin","Aspirin","Alcohol"],0,"Monohydrate (oval/dumbbell) in ethylene glycol poisoning."],
+[5,"Which crystals are seen in liver disease?",["Leucine and tyrosine","Uric acid","Cystine","Calcium oxalate"],0,"Leucine: spheres with concentric rings; tyrosine: fine needles in sheaves."],
+[5,"Transitional epithelial cells come from:",["Bladder/renal pelvis/ureters","Vagina","Proximal tubule","Urethra only"],0,"Renal tubular epithelial cells (RTE) are most significant clinically; squamous cells indicate contamination."],
+[5,"Oval fat bodies are:",["Lipid-containing RTE cells, Maltese cross polarized","WBCs","Bacteria","Yeast"],0,"Nephrotic syndrome: heavy proteinuria (>3.5 g/day), hypoalbuminemia, lipiduria."],
+[5,"Cerebrospinal fluid collected in 3 tubes: tube 1 is used for:",["Chemistry/serology","Hematology","Microbiology","Cytology"],0,"Tube 1: chemistry/serology (most contaminated by blood/tissue); tube 2: microbiology; tube 3: cell count/differential (least cellular contamination)."],
+[5,"A CSF glucose that is LOW with high neutrophils and high protein suggests:",["Bacterial meningitis","Viral meningitis","Normal","Subarachnoid hemorrhage only"],0,"Viral: normal glucose, lymphocytosis, mildly elevated protein. Fungal/TB: low glucose, lymphocytes."],
+[5,"Xanthochromia in CSF supports:",["Subarachnoid hemorrhage (RBC breakdown)","Traumatic tap","Viral meningitis","Normal"],0,"Traumatic tap: clearing between tubes 1 to 3, no xanthochromia; clot may form."],
+[5,"To lyse RBCs before a CSF WBC count, the diluent is:",["3% acetic acid","Normal saline","Methylene blue only","Formalin"],0,"Acetic acid lyses RBCs for the WBC count; saline is used when counting RBCs. Count in a Neubauer chamber."],
+[5,"Seminal fluid analysis: normal sperm concentration (WHO 2021 lower reference) is at least about:",["16 million/mL","60 million/mL","5 million/mL","100 million/mL"],0,"Older criteria: ≥20 million/mL. Volume ≥1.4 mL, motility ≥42% total (30% progressive), morphology ≥4% normal (strict). Liquefaction within 60 minutes."],
+[5,"Synovial fluid with crystals shaped like needles, negatively birefringent (yellow when parallel to the compensator axis) is:",["Monosodium urate (gout)","Calcium pyrophosphate","Cholesterol","Cystine"],0,"Memory: MSU = negative birefringence = needle; CPPD (pseudogout) = rhomboid, positive birefringence (blue when parallel)."],
+[5,"Pleural fluid is an exudate if (Light’s criteria):",["Fluid/serum protein >0.5, fluid/serum LD >0.6, or fluid LD >2/3 upper limit","Protein <3 g/dL","LD <200","Clear appearance"],0,"Transudate: CHF, cirrhosis, nephrotic syndrome (low protein). Exudate: infection, malignancy."],
+[5,"Amniotic fluid lecithin:sphingomyelin ratio of ≥2.0 indicates:",["Fetal lung maturity","Fetal distress","Neural tube defect","Hemolytic disease"],0,"Phosphatidylglycerol presence also indicates maturity; lamellar body count ≥50,000/µL."],
+[5,"A normal fecal fat quantitation on 72-h collection is less than:",["7 g/24 h","20 g/24 h","50 g/24 h","1 g/24 h"],0,"Steatorrhea indicates malabsorption; Sudan III stain for fat droplets."],
+// ---------- 6 LAB OPS ----------
+[6,"The Levey-Jennings chart plots:",["Control values over time against mean and ±SD limits","Patient results only","Reagent lot numbers","Turnaround time"],0,"QC chart; Westgard rules assess shifts/trends."],
+[6,"Which Westgard rule indicates RANDOM error?",["1-3s and R-4s","2-2s","4-1s","10x"],0,"Systematic error: 2-2s, 4-1s, 10x. Random error: 1-3s, R-4s. 1-2s is a warning rule."],
+[6,"A 'shift' in QC data is:",["Six or more consecutive values on one side of the mean","One value >3SD","Random scatter","Control out of range once"],0,"A shift = abrupt sustained change (new reagent lot, calibration); a trend = gradual drift in one direction (deteriorating reagent, light source)."],
+[6,"Sensitivity of a test is defined as:",["True positives ÷ (true positives + false negatives)","True negatives ÷ (true negatives + false positives)","TP ÷ (TP + FP)","TN ÷ (TN + FN)"],0,"Specificity = TN/(TN+FP). PPV = TP/(TP+FP). NPV = TN/(TN+FN). Screening tests need high sensitivity; confirmatory tests high specificity."],
+[6,"Accuracy refers to closeness to the:",["True value","Replicate results","Mean","Reference range"],0,"Precision = reproducibility, measured by SD and CV% (CV = SD/mean × 100). Standard deviation of QC is based on at least 20 data points."],
+[6,"Reference intervals are usually set as:",["Mean ±2 SD (95% of healthy population)","±3 SD","Mean ±1 SD","Median only"],0,"Verify manufacturer ranges with at least 20 reference specimens; establish with at least 120."],
+[6,"Which agency issues CLIA regulations?",["CMS (Centers for Medicare and Medicaid Services)","OSHA","FDA only","CDC only"],0,"CLIA'88 sets quality standards for all lab testing on human specimens. Waived, moderate (PPM), and high complexity. CAP and Joint Commission may accredit (deemed status)."],
+[6,"OSHA's Bloodborne Pathogens Standard requires:",["Universal/standard precautions, hepatitis B vaccine offered free, sharps containers","Annual HIV test for staff","Double gloves","No lab coats"],0,"Exposure incident: wash site, report immediately, post-exposure evaluation. Training annually."],
+[6,"The best disinfectant for blood spills is:",["Fresh 1:10 dilution of bleach (about 0.5% sodium hypochlorite)","70% alcohol only","Soap","Water"],0,"Dilution should be made fresh daily; wear PPE; absorb, clean, then disinfect."],
+[6,"In case of a chemical splash to the eyes, flush for at least:",["15 minutes","1 minute","5 minutes","30 seconds"],0,"Use eyewash station, then seek medical help. Consult the Safety Data Sheet (SDS)."],
+[6,"The NFPA diamond: red section represents:",["Flammability","Health","Reactivity","Special hazards"],0,"Blue = health, red = fire, yellow = reactivity, white = special (e.g., W = water reactive, OX = oxidizer). Ratings 0-4."],
+[6,"The RACE acronym for fire stands for:",["Rescue, Alarm, Contain, Extinguish","Run, Alert, Call, Exit","Report, Act, Close, Evacuate","Remove, Alarm, Cover, End"],0,"PASS for extinguisher: Pull, Aim, Squeeze, Sweep. Class A: ordinary combustibles; B: flammable liquids; C: electrical; D: metals."],
+[6,"Specimens for blood cultures, order of draw (CLSI): which is first?",["Blood culture bottles/sterile tube","Light blue (citrate)","Red","Lavender"],0,"Order: blood cultures → light blue (citrate) → red/gold (serum) → green (heparin) → lavender (EDTA) → gray (fluoride/oxalate)."],
+[6,"Which tube additive is used for coagulation testing?",["Sodium citrate 3.2% (9:1 blood to anticoagulant)","EDTA","Heparin","Sodium fluoride"],0,"Underfilled tube gives falsely prolonged PT/aPTT. Gray top inhibits glycolysis for glucose."],
+[6,"EDTA is used for:",["CBC and blood bank testing","Chemistry","Coagulation","Blood culture"],0,"EDTA chelates calcium; contaminated chemistry results show high K, low Ca, low ALP, low Mg."],
+[6,"Which specimen error falsely increases potassium?",["Hemolysis and delayed separation","Fasting","Refrigeration of plasma","Collection in gray top only"],0,"Fist clenching, tourniquet >1 min also increases K. Also increased: LD, AST, phosphorus."],
+[6,"A critical (panic) value must be:",["Reported immediately to the responsible clinician with read-back and documentation","Reported next day","Saved for rounds","Ignored if repeated"],0,"Document who, when, value, and read-back."],
+[6,"Proficiency testing under CLIA requires labs to:",["Analyze external samples several times a year and report results","Test their own controls only","Send samples to the vendor once","Skip for waived tests"],0,"Satisfactory performance is ≥80% per analyte; failures need corrective action."],
+[6,"Calibration verification is required at least every:",["6 months","Weekly","Daily","2 years"],0,"Also after major maintenance, reagent lot changes (if QC indicates), and when controls show unusual trends."],
+[6,"A delta check compares:",["A patient result with the previous result","Controls with mean","Two analyzers","Reagent lots"],0,"Used to detect specimen mix-ups or errors."],
+[6,"Which instrument principle is used by most automated hematology analyzers for cell counting?",["Electrical impedance (Coulter) and light scatter","Spectrophotometry only","Turbidity","Nephelometry"],0,"Hemoglobin measured by cyanmethemoglobin/SLS spectrophotometry; Hct calculated (RBC × MCV)."],
+[6,"The MCV is calculated as:",["Hct × 10 ÷ RBC count","Hgb × 10 ÷ RBC","Hgb ÷ Hct × 100","Hct ÷ Hgb"],0,"MCH = Hgb × 10 ÷ RBC; MCHC = Hgb ÷ Hct × 100. Normal MCV 80-100 fL."],
+[6,"PCR amplification cycles consist of:",["Denaturation, annealing, extension","Annealing, ligation, transcription","Digestion, fusion, binding","Hybridization only"],0,"Reverse transcriptase PCR converts RNA to cDNA; real-time PCR monitors amplification by fluorescence; contamination control requires separate pre/post-amplification areas."],
+[6,"Fluorescence in situ hybridization (FISH) detects:",["Specific chromosomal abnormalities with fluorescent probes","Antibodies","Enzymes","Cell size"],0,"Used for BCR-ABL, HER2, PML-RARA, etc."],
+[6,"Which type of error is a transcription (clerical) mistake?",["Pre-analytical or post-analytical error","Analytical error only","Random error","Systematic error only"],0,"Most lab errors occur in the pre-analytic phase (identification, collection, transport)."],
+[6,"Quality assurance includes:",["Pre-analytic, analytic and post-analytic quality control","Analytic QC only","Billing","Only proficiency tests"],0,"Includes competency assessment, equipment maintenance, corrective action, and documentation."],
+[6,"Competency assessment of employees must be done at:",["Six months and annually after the first year for new employees (CLIA)","Every 5 years","Only at hire","Never required"],0,"Six elements: direct observation, monitoring recording/reporting, review of records, direct observation of maintenance, testing known specimens, problem solving."],
+[6,"A technologist finds a control outside ±3SD. The first step is to:",["Stop reporting patient results, troubleshoot, and repeat control","Report patient results anyway","Change the mean","Discard the QC chart"],0,"Check for reagent/calibrator problems, then rerun; document corrective action; review patient results since the last acceptable QC."],
+[6,"Which blood product storage alarm limits apply to blood bank refrigerators?",["1-6 °C with continuous recording and alarm","4-10 °C","-5 to 5 °C","10-15 °C"],0,"Thermometers must be calibrated; alarm should sound before reaching unacceptable temperature."],
+[6,"The cyanmethemoglobin method for hemoglobin measures at:",["540 nm","340 nm","620 nm","280 nm"],0,"Measures all hemoglobins except sulfhemoglobin; Drabkin reagent; standard curve."]
+];
+
+let store={missed:{},hist:[]};
+try{const x=localStorage.getItem('ascpi');if(x)store=JSON.parse(x)}catch(e){}
+function save(){try{localStorage.setItem('ascpi',JSON.stringify(store))}catch(e){}}
+const $=id=>document.getElementById(id);
+let sel=new Set(SECTIONS.map((_,i)=>i));
+const qid=q=>q[1].slice(0,60);
+function drawChips(){$('chips').innerHTML='';SECTIONS.forEach((s,i)=>{const c=document.createElement('div');c.className='chip'+(sel.has(i)?' on':'');c.textContent=s+' ('+Q.filter(q=>q[0]==i).length+')';c.onclick=()=>{sel.has(i)?sel.delete(i):sel.add(i);drawChips()};$('chips').appendChild(c)});
+ $('avail').textContent=pool().length+' questions available';
+ const h=store.hist.slice(-5).reverse();$('hist').innerHTML=h.length?'Recent scores: '+h.map(x=>x.score+'/'+x.total).join(' · '):'';}
+function pool(){let p=Q.filter(q=>sel.has(q[0]));if($('focus')&&$('focus').value=='missed')p=p.filter(q=>store.missed[qid(q)]);return p}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+$('all').onclick=()=>{sel=new Set(SECTIONS.map((_,i)=>i));drawChips()};
+$('none').onclick=()=>{sel.clear();drawChips()};
+$('focus').onchange=drawChips;
+function start(mode){const p=pool();if(!p.length){alert('No questions for that selection.');return}
+ const n=Math.min(+$('n').value,p.length);const set=shuffle(p).slice(0,n);
+ $('setup').classList.add('hide');$('play').classList.remove('hide');
+ mode=='quiz'?quiz(set):cards(set)}
+$('goQuiz').onclick=()=>start('quiz');$('goCards').onclick=()=>start('cards');
+function home(){$('play').classList.add('hide');$('setup').classList.remove('hide');drawChips()}
+function quiz(set){let i=0,score=0,wrong=[];
+ function show(){const q=set[i];const idx=shuffle(q[2].map((_,k)=>k));let done=false;
+  $('play').innerHTML=`<div class="meta"><span>${SECTIONS[q[0]]}</span><span>${i+1} / ${set.length}</span></div><div class="bar"><i style="width:${i/set.length*100}%"></i></div><div class="card"><p class="q"></p><div id="opts"></div><div id="ex"></div></div><div class="row"><button id="quit">Quit</button><button class="pri hide" id="next"></button></div>`;
+  $('play').querySelector('.q').textContent=q[1];
+  idx.forEach(k=>{const b=document.createElement('button');b.className='opt';b.textContent=q[2][k];b.onclick=()=>{if(done)return;done=true;
+   const right=k==q[3];if(right){score++;delete store.missed[qid(q)]}else{wrong.push(q);store.missed[qid(q)]=1}
+   [...$('opts').children].forEach((o,j)=>{o.disabled=true;if(idx[j]==q[3])o.classList.add('ok')});if(!right)b.classList.add('bad');
+   $('ex').innerHTML='<div class="expl"></div>';$('ex').firstChild.textContent=(right?'Correct. ':'Not quite. ')+q[4];
+   const nx=$('next');nx.classList.remove('hide');nx.textContent=i+1<set.length?'Next':'See results';nx.focus()};$('opts').appendChild(b)});
+  $('next').onclick=()=>{i++;i<set.length?show():finish()};$('quit').onclick=()=>{save();home()}}
+ function finish(){store.hist.push({score,total:set.length});save();
+  const by={};set.forEach(q=>by[q[0]]=by[q[0]]||[0,0]);wrong.forEach(q=>by[q[0]][1]++);set.forEach(q=>by[q[0]][0]++);
+  $('play').innerHTML=`<div class="card" style="text-align:center"><div class="big">${Math.round(score/set.length*100)}%</div><div>${score} of ${set.length} correct</div></div>
+  <div class="card"><strong>By section</strong><table>${Object.keys(by).map(k=>`<tr><td>${SECTIONS[k]}</td><td>${by[k][0]-by[k][1]} / ${by[k][0]}</td></tr>`).join('')}</table></div>
+  ${wrong.length?'<div class="card"><strong>Review what you missed</strong><div id="rev"></div></div>':''}
+  <div class="row"><button class="pri" id="again">Back to start</button></div>`;
+  wrong.forEach(q=>{const d=document.createElement('div');d.style.cssText='margin:12px 0;padding-top:10px;border-top:1px solid var(--line)';d.innerHTML='<b></b><div style="color:var(--ok);margin-top:4px"></div><div style="color:var(--mute);font-size:14px;margin-top:4px"></div>';
+   d.children[0].textContent=q[1];d.children[1].textContent='Answer: '+q[2][q[3]];d.children[2].textContent=q[4];$('rev').appendChild(d)});
+  $('again').onclick=home}
+ show()}
+function cards(set){let i=0,flip=false;
+ function show(){const q=set[i];
+  $('play').innerHTML=`<div class="meta"><span>${SECTIONS[q[0]]}</span><span>${i+1} / ${set.length}</span></div><div class="bar"><i style="width:${(i+1)/set.length*100}%"></i></div><div class="card fc" id="fc"></div><div class="row"><button id="prev">Back</button><button class="pri" id="nx">Next</button><button id="quit">Done</button></div><p class="sub">Tap the card to flip.</p>`;
+  const f=$('fc');const draw=()=>{f.innerHTML='<div><small></small><span></span></div>';f.querySelector('small').textContent=flip?'Answer':'Question';f.querySelector('span').textContent=flip?q[2][q[3]]+' — '+q[4]:q[1]};draw();
+  f.onclick=()=>{flip=!flip;draw()};
+  $('prev').onclick=()=>{if(i>0){i--;flip=false;show()}};$('nx').onclick=()=>{if(i+1<set.length){i++;flip=false;show()}else home()};$('quit').onclick=home}
+ show()}
+drawChips();
+</script></body></html>
