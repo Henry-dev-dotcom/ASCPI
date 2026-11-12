@@ -70,6 +70,8 @@ button.inst{margin-left:auto;font:inherit;font-size:14px;font-weight:600;border-
 .sheet .card{max-width:440px;width:100%;margin:0;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 .sheet ol{padding-left:22px;margin:8px 0 14px}.sheet li{margin:6px 0}
 @media(min-width:561px){.sheet{align-items:center}}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:30;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);box-shadow:0 6px 24px rgba(0,0,0,.25);animation:tin .25s ease-out}
+@keyframes tin{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 @media(max-width:560px){.hw{position:relative}button.inst{position:absolute;top:9px;right:12px;padding:5px 11px;font-size:13px}.hw:has(#inst:not(.hide)) nav{padding-right:92px}}
 @media(max-width:560px){.logo{display:none}.les .n{display:none}}
 </style></head><body>
@@ -246,7 +248,14 @@ if(h0.startsWith('lesson/')&&lessonById(h0.slice(7)))go('lesson',h0.slice(7));
 else go(['path','quiz','mock','cards','progress','plan'].includes(h0)?h0:'path');
 
 /* ---------- INSTALL (PWA) ---------- */
-if('serviceWorker' in navigator&&location.protocol!='file:')addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+function toast(msg){document.querySelectorAll('.toast').forEach(x=>x.remove());const t=document.createElement('div');t.className='toast';t.setAttribute('role','status');t.textContent=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),4500)}
+if('serviceWorker' in navigator&&location.protocol!='file:'){
+ const firstInstall=!navigator.serviceWorker.controller;
+ addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(firstInstall)toast('Saved for offline use. The app now works without internet.')});
+}
+addEventListener('offline',()=>toast('You are offline. Lessons, quizzes and your progress still work.'));
+addEventListener('online',()=>toast('Back online.'));
 (function(){
  const btn=$('#inst'),ua=navigator.userAgent;let deferred=null;
  const standalone=()=>matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;
