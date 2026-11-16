@@ -1,12 +1,13 @@
 // Service worker: makes the app (and the installed app) work offline.
 // Strategy: network first so updates show up, but give up after a few seconds on a
 // weak connection and use the saved copy. With no network at all, the saved copy is used.
-const CACHE = 'ascpi-v2';
+const CACHE = 'ascpi-v3';
 const APP = './ASCPi%20MLS%20Study%20App.html';
 const CORE = [
   './',
   './index.html',
   APP,
+  './explained.js',
   './ASCPi%20MLS%20Practice%20Quiz.html',
   './manifest.webmanifest',
   './icons/icon-192.png',
