@@ -1,0 +1,81 @@
+<p class="lead">Every patient result depends on one assumption: the test was working correctly when it ran. <b>Quality control (QC)</b> is how the lab proves it. You run samples with known values (controls) alongside the patients, and if a control misbehaves, you don't trust the patient results. This lesson explains the statistics behind QC in plain terms, then how to read QC charts and the Westgard rules.</p>
+
+<h3>The 8 big ideas, explained</h3>
+<ol>
+<li><b>Accuracy vs precision.</b> Accuracy = hitting the true value. Precision = getting the same answer again and again.</li>
+<li><b>Shift vs trend.</b> A shift is a sudden jump to a new level; a trend is a gradual drift. Both are systematic errors.</li>
+<li><b>Westgard rules</b>: 1-2s warns; 1-3s and R-4s mean random error; 2-2s, 4-1s and 10x mean systematic error. Failed QC means patient results are held.</li>
+<li><b>Who does what</b>: CLIA is the federal law, CAP and The Joint Commission accredit, OSHA protects workers, CLSI writes standards.</li>
+<li><b>Standard precautions</b>: treat all blood and body fluids as infectious; never recap needles.</li>
+<li><b>Blood spills</b>: fresh 1:10 bleach.</li>
+<li><b>Order of draw</b>: blood cultures, light blue, red/gold, green, lavender, gray.</li>
+<li><b>Most errors are preanalytic</b>: wrong patient, wrong tube, poor collection.</li>
+</ol>
+
+<h3>Accuracy and precision: the dartboard</h3>
+<p>Picture throwing darts at a target:</p>
+<ul>
+<li><b>Accurate and precise</b>: all darts tightly grouped in the bullseye. The ideal.</li>
+<li><b>Precise but not accurate</b>: tightly grouped, but off to one side. Every result is wrong by the same amount: <b>systematic error (bias)</b>.</li>
+<li><b>Accurate on average but not precise</b>: spread all around the bullseye: <b>random error</b>.</li>
+</ul>
+<p><b>Precision</b> is measured by the <b>standard deviation (SD)</b> and the <b>coefficient of variation (CV)</b>. <b>Accuracy</b> is judged by comparing with the true value (reference materials, proficiency testing, method comparison).</p>
+
+<h3>The basic statistics, made simple</h3>
+<ul>
+<li><b>Mean</b> = the average (add all values, divide by how many).</li>
+<li><b>Standard deviation (SD)</b> = how spread out the values are around the mean. Small SD = tight, precise results.</li>
+<li><b>Coefficient of variation (CV%)</b> = (SD ÷ mean) × 100. It expresses spread as a percentage, so you can compare precision between tests with different units or levels. Lower CV = better precision.</li>
+</ul>
+<div class="box ex"><b>Worked example</b>Control mean 100 mg/dL, SD 5. CV = 5 ÷ 100 × 100 = <b>5%</b>. Today's control is 112: (112 − 100) ÷ 5 = <b>+2.4 SD</b>, which breaks the 1-2s warning limit.</div>
+<p><b>The normal (Gaussian) distribution</b>: if you run the same control many times, the results form a bell curve. Within <b>±1 SD</b> fall about <b>68%</b> of results; within <b>±2 SD</b> about <b>95%</b>; within <b>±3 SD</b> about <b>99.7%</b>. That is where QC limits come from: a control outside 2 SD should happen only about 1 time in 20 by chance, and outside 3 SD only about 3 times in 1,000.</p>
+<p><b>Reference intervals</b> are built the same way: the <b>middle 95%</b> of healthy people (about mean ± 2 SD). That means <b>about 5% of healthy people will fall outside the "normal" range</b> just by chance; an abnormal result isn't always disease. Labs establish a reference interval with at least <b>120</b> healthy people, or verify a manufacturer's interval with at least <b>20</b>.</p>
+
+<h3>Levey-Jennings charts and the Westgard rules</h3>
+<p>Control results are plotted each day on a <b>Levey-Jennings chart</b>: the mean is drawn as the centre line, with lines at ±1, ±2 and ±3 SD. Run at least <b>two levels</b> of control (for example normal and abnormal) each day. The Westgard rules are a checklist for spotting trouble. The name tells you the rule: "<b>2-2s</b>" means <b>2</b> controls beyond <b>2 s</b>(D).</p>
+<ul>
+<li><b>1-2s</b>: one control outside ±2 SD. A <b>warning</b> only. It prompts you to check the other rules, but doesn't reject the run by itself.</li>
+<li><b>1-3s</b>: one control outside ±3 SD. <b>Reject. Random error</b> (or a big systematic error).</li>
+<li><b>R-4s</b>: within one run, one control above +2 SD and another below −2 SD (a range of more than 4 SD). <b>Reject. Random error</b>: the results are scattering.</li>
+<li><b>2-2s</b>: two controls in a row (or both levels in one run) beyond 2 SD <b>on the same side</b>. <b>Reject. Systematic error.</b></li>
+<li><b>4-1s</b>: four in a row beyond 1 SD on the same side. <b>Reject. Systematic error.</b></li>
+<li><b>10x</b>: ten in a row on the same side of the mean. <b>Reject. Systematic error</b> (a shift).</li>
+</ul>
+<div class="box tip"><b>Memory hook: random or systematic?</b><b>Random</b> rules catch <b>scatter</b>: one wild point (1-3s) or points far apart in opposite directions (R-4s). <b>Systematic</b> rules catch <b>everything leaning one way</b>: 2-2s, 4-1s, 10x.</div>
+
+<h3>Shifts, trends and their causes</h3>
+<ul>
+<li><b>Shift</b>: an abrupt jump to a new level that stays (six or more points on one side). Causes: a <b>new reagent lot</b>, a <b>recalibration</b>, a new control lot, maintenance or a part replaced.</li>
+<li><b>Trend</b>: values <b>gradually drifting</b> in one direction (six or more points steadily rising or falling). Causes: <b>deteriorating reagent</b>, an <b>aging lamp</b>, a dirty probe, slow temperature drift.</li>
+<li><b>Increased scatter</b>: random error. Causes: <b>pipetting problems</b>, <b>bubbles</b>, poor mixing, an unstable power supply.</li>
+</ul>
+
+<h3>What to do when QC fails</h3>
+<ol>
+<li><b>Stop.</b> Don't report patient results from that run.</li>
+<li><b>Look for the cause</b>: reagents (expired? new lot? stored properly?), calibration, the instrument (maintenance, lamp, temperature), the control material itself.</li>
+<li><b>Fix it</b>: recalibrate, replace the reagent, do maintenance. Then <b>rerun the controls</b>. Simply rerunning the same control until it "passes" is not acceptable.</li>
+<li><b>Review patient results</b> run since the last acceptable QC, and rerun them if needed.</li>
+<li><b>Document</b> everything (corrective action).</li>
+</ol>
+<div class="box trap"><b>Exam trap: changing the mean</b>Never change the control mean or widen the limits to make QC "pass". Means are set for a new control lot by running it alongside the old lot, collecting at least <b>20 data points</b>.</div>
+
+<h3>Other quality tools</h3>
+<ul>
+<li><b>Method verification</b> (before a new test is used for patients): check <b>accuracy</b>, <b>precision</b>, the <b>reportable range</b> (linearity) and the <b>reference interval</b>.</li>
+<li><b>Delta checks</b>: compare a patient's result with their previous one. A big unexplained change (Hgb 14 yesterday, 6 today) flags a possible <b>mix-up</b> or contaminated sample.</li>
+</ul>
+
+<h3>More statistics you should recognise</h3>
+<ul>
+<li><b>Mean, median, mode</b>: average, middle value, and most frequent value. In a symmetric bell curve they are about equal; in a skewed distribution they separate.</li>
+<li><b>95% confidence interval</b> = mean ± 1.96 SD (about 2 SD).</li>
+<li><b>Method comparison</b> (old vs new method on the same samples): the <b>correlation coefficient (r)</b> shows how closely they track (1.0 = perfect). In the regression line, the <b>slope</b> shows <b>proportional error</b> (the gap grows with concentration) and the <b>y-intercept</b> shows <b>constant error</b> (a fixed offset).</li>
+<li><b>t-test</b> compares two <b>means</b> (accuracy). <b>F-test</b> compares two <b>SDs</b> (precision).</li>
+</ul>
+
+<h3>Check your understanding</h3>
+<details class="sc"><summary>Two consecutive controls are both +2.2 SD. Which rule, and what type of error?</summary><p>2-2s; systematic error (such as calibration drift).</p></details>
+<details class="sc"><summary>Control level 1 is +2.5 SD and level 2 is −2.3 SD in the same run. Which rule?</summary><p>R-4s (range over 4 SD): random error. Reject the run.</p></details>
+<details class="sc"><summary>QC values have been slowly rising for 8 days. Pattern and likely cause?</summary><p>A trend (systematic). Likely a deteriorating reagent, an aging light source or temperature drift.</p></details>
+<details class="sc"><summary>Mean 250, SD 10. What is the CV?</summary><p>10 ÷ 250 × 100 = 4%.</p></details>
