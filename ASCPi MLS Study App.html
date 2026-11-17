@@ -70,6 +70,9 @@ button.inst{margin-left:auto;font:inherit;font-size:14px;font-weight:600;border-
 .sheet .card{max-width:440px;width:100%;margin:0;box-shadow:0 10px 40px rgba(0,0,0,.3)}
 .sheet ol{padding-left:22px;margin:8px 0 14px}.sheet li{margin:6px 0}
 @media(min-width:561px){.sheet{align-items:center}}
+a.b.dl{display:inline-block;text-decoration:none;font:inherit;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:9px 16px}
+a.b.pri.dl{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+@media(prefers-color-scheme:dark){a.b.pri.dl{color:#06201b}}
 .xlink{display:flex;gap:12px;align-items:center;margin:12px 0 4px;padding:12px 14px;border:1px solid var(--acc);border-radius:10px;background:var(--accbg);color:var(--ink);text-decoration:none}
 .xlink:hover{filter:brightness(.97)}.xlink .ic{font-size:24px}.xlink small{color:var(--mute)}
 .xp #body{font-size:16.5px;line-height:1.7}.xp .lead{font-size:17.5px;line-height:1.65;margin:14px 0 6px}
@@ -167,6 +170,7 @@ function explainList(){
  if(!ids.length){main.innerHTML='<h1>Explained</h1><div class="card"><p>The detailed explanations could not be loaded. Connect to the internet once and reopen the app.</p></div>';return}
  const rd=ids.filter(l=>S.xread[l.id]).length,next=ids.find(l=>!S.xread[l.id]);
  let h=`<h1>Explained</h1><p class="sub">The same lessons, explained in detail: why things happen, worked examples, memory hooks and exam traps. Use them when the short notes feel too brief.</p>
+ <div class="card"><strong>Download the explained notes</strong><p class="sub" style="margin:4px 0 10px">All 51 topics with figures and self-checks, as a printable book (185 pages).</p><div class="row" style="margin:0"><a class="b pri dl" href="ASCPi%20MLS%20Study%20Notes%20-%20Explained.pdf" download>⬇ PDF (4.4 MB)</a><a class="b dl" href="ASCPi%20MLS%20Study%20Notes%20-%20Explained.docx" download>⬇ Word (4.9 MB)</a></div></div>
  <div class="card hero"><div class="meta"><span>${rd} of ${ids.length} explanations read</span><span>${Math.round(rd/ids.length*100)}%</span></div><div class="bar"><i style="width:${rd/ids.length*100}%"></i></div>
  ${next?`<h2>Next up: ${esc(next.title)}</h2><p class="sub" style="margin:0 0 10px">${esc(SECS[next.sec])} · about ${EX[next.id].min} min</p><button class="b pri" id="nx">Start reading</button>`:'<h2>All explanations read</h2><p class="sub">Test yourself with a mock exam.</p>'}</div>`;
  SECTIONS.forEach((s,si)=>{const ls=ids.filter(l=>l.sec==si);if(!ls.length)return;
